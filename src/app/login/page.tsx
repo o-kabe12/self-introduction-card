@@ -26,6 +26,8 @@ export default function LoginPage() {
       if (error) {
         setError(error.message);
       } else {
+        // ログイン成功時にゲストモードのフラグをクリア
+        sessionStorage.removeItem('guestMode');
         router.push("/mypage"); // ログイン成功時にマイページへ遷移
       }
     } else {

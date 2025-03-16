@@ -5,6 +5,7 @@ import Image from "next/image";
 import ThemeToggle from "./ThemeToggle";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import { supabaseClientInstance } from "../lib/supabaseClient";
 
 export default function Header() {
   const pathname = usePathname();
@@ -13,32 +14,45 @@ export default function Header() {
   const [isDarkMode, setIsDarkMode] = useState(false);
 
   useEffect(() => {
-    // クライアントサイドでのみ実行
-    const guestMode = sessionStorage.getItem('guestMode') === 'true';
-    setIsGuest(guestMode);
+    const checkSessionAndTheme = async () => {
+      // セッション情報を取得
+      const { data: { session } } = await supabaseClientInstance.auth.getSession();
+      
+      if (session) {
+        // ログイン済みの場合はゲストモードを無効化
+        sessionStorage.removeItem('guestMode');
+        setIsGuest(false);
+      } else {
+        // ゲストモードかどうかをチェック
+        const guestMode = sessionStorage.getItem('guestMode') === 'true';
+        setIsGuest(guestMode);
+      }
 
-    // ダークモードの検出
-    const checkDarkMode = () => {
-      const isDark = document.documentElement.classList.contains('dark');
-      setIsDarkMode(isDark);
+      // ダークモードの検出
+      const checkDarkMode = () => {
+        const isDark = document.documentElement.classList.contains('dark');
+        setIsDarkMode(isDark);
+      };
+
+      // 初期チェック
+      checkDarkMode();
+
+      // MutationObserverでdarkクラスの変更を監視
+      const observer = new MutationObserver((mutations) => {
+        mutations.forEach((mutation) => {
+          if (mutation.attributeName === 'class') {
+            checkDarkMode();
+          }
+        });
+      });
+
+      observer.observe(document.documentElement, { attributes: true });
+
+      return () => observer.disconnect();
     };
 
-    // 初期チェック
-    checkDarkMode();
-
-    // MutationObserverでdarkクラスの変更を監視
-    const observer = new MutationObserver((mutations) => {
-      mutations.forEach((mutation) => {
-        if (mutation.attributeName === 'class') {
-          checkDarkMode();
-        }
-      });
-    });
-
-    observer.observe(document.documentElement, { attributes: true });
-
-    return () => observer.disconnect();
-  }, []);
+    checkSessionAndTheme();
+  }, [pathname]); // パスが変わるたびにセッションをチェック
 
   const handleMyPageClick = (e: React.MouseEvent) => {
     if (isGuest) {

@@ -28,19 +28,28 @@ export default function Home() {
 
   useEffect(() => {
     const checkSession = async () => {
-      // ゲストモードかどうかをチェック
-      const guestMode = sessionStorage.getItem('guestMode') === 'true';
-      setIsGuest(guestMode);
-
+      // セッション情報を取得
       const { data: { session } } = await supabaseClientInstance.auth.getSession();
-
-      if (!session && !guestMode && window.location.pathname !== "/login") {
-        console.log("🔄 クライアント側でリダイレクト: /login");
-        router.replace("/login"); // ✅ クライアント側リダイレクト
+      
+      // ログイン済みの場合はゲストモードを無効化
+      if (session) {
+        sessionStorage.removeItem('guestMode');
+        setIsGuest(false);
       } else {
-        setLoading(false);
-        fetchUsers();
+        // ゲストモードかどうかをチェック
+        const guestMode = sessionStorage.getItem('guestMode') === 'true';
+        setIsGuest(guestMode);
+        
+        // 未ログインかつゲストモードでもない場合はログインページへリダイレクト
+        if (!guestMode && window.location.pathname !== "/login") {
+          console.log("🔄 クライアント側でリダイレクト: /login");
+          router.replace("/login"); // ✅ クライアント側リダイレクト
+          return;
+        }
       }
+      
+      setLoading(false);
+      fetchUsers();
     };
 
     checkSession();

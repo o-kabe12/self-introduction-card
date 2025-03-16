@@ -3,10 +3,12 @@
 import { useEffect, useState } from 'react';
 import Image from 'next/image';
 import Layout from '../components/Layout';
+import { useRouter } from 'next/navigation';
 // import { createClient } from "@supabase/supabase-js";
 import { supabaseClientInstance } from '../lib/supabaseClient';
 
 export default function MyPage() {
+  const router = useRouter();
   const [userData, setUserData] = useState({
     name: "",
     job: "",
@@ -120,8 +122,23 @@ export default function MyPage() {
   };
 
   useEffect(() => {
-    fetchUserData();
-  }, []);
+    const checkSession = async () => {
+      // セッション情報を取得
+      const { data: { session } } = await supabaseClient.auth.getSession();
+      
+      if (session) {
+        // ログイン済みの場合はゲストモードを無効化
+        sessionStorage.removeItem('guestMode');
+        fetchUserData();
+      } else {
+        // 未ログインの場合はログインページにリダイレクト
+        console.log("未ログインのため、ログインページにリダイレクトします");
+        router.replace("/login");
+      }
+    };
+    
+    checkSession();
+  }, [router]);
 
   return (
     <Layout>
