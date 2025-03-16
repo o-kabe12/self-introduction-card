@@ -110,21 +110,21 @@ export default function Home() {
                 
                 <div className="space-y-3 mb-4">
                   {user.job && (
-                    <div className="flex items-center">
+                    <div className="flex">
                       <span className="text-gray-600 dark:text-gray-400 font-medium w-24">職業・職種:</span>
                       <span className="text-gray-800 dark:text-gray-200">{user.job}</span>
                     </div>
                   )}
                   
                   {user.language && (
-                    <div className="flex items-center">
+                    <div className="flex">
                       <span className="text-gray-600 dark:text-gray-400 font-medium w-24">得意な言語:</span>
                       <span className="text-gray-800 dark:text-gray-200">{user.language}</span>
                     </div>
                   )}
                   
                   {user.hobby && (
-                    <div className="flex items-center">
+                    <div className="flex">
                       <span className="text-gray-600 dark:text-gray-400 font-medium w-24">趣味:</span>
                       <span className="text-gray-800 dark:text-gray-200">{user.hobby}</span>
                     </div>
