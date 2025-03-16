@@ -20,6 +20,7 @@ export default function MyPage() {
 
   const [file, setFile] = useState<File | null>(null);
   const [loading, setLoading] = useState(false);
+  const [userId, setUserId] = useState<string | null>(null);
   
   const supabaseClient = supabaseClientInstance;
 
@@ -81,18 +82,41 @@ export default function MyPage() {
   };
   
   const fetchUserData = async () => {
-    const { data, error } = await supabaseClient
-      .from('users')
-      .select('*')
-      .single();
+    try {
+      // 現在ログインしているユーザーの情報を取得
+      const { data: { user } } = await supabaseClient.auth.getUser();
+      
+      if (!user) {
+        console.log("ユーザーがログインしていません");
+        return;
+      }
+      
+      setUserId(user.id);
+      
+      // ユーザーIDに基づいてデータを取得
+      const { data, error } = await supabaseClient
+        .from('users')
+        .select('*')
+        .eq('id', user.id)
+        .single();
 
-    if (error) {
-      return;
+      if (error) {
+        if (error.code === 'PGRST116') {
+          // データが見つからない場合は新規ユーザーとして扱う
+          console.log("新規ユーザーです。データを初期化します。");
+          return;
+        }
+        console.error("データ取得エラー:", error);
+        return;
+      }
+
+      if (data) {
+        console.log("取得したユーザーデータ:", data);
+        setUserData((prev) => ({ ...prev, ...data }));
+      }
+    } catch (error) {
+      console.error("データ取得中にエラーが発生しました:", error);
     }
-
-    console.log(data)
-
-    setUserData((prev) => ({ ...prev, ...data }));
   };
 
   useEffect(() => {
@@ -126,6 +150,11 @@ export default function MyPage() {
           </div>
           
           <div className="p-6 space-y-6">
+            {userId && (
+              <div className="text-xs text-gray-500 dark:text-gray-400 text-center">
+                ユーザーID: {userId}
+              </div>
+            )}
             <div className="space-y-4">
               <div>
                 <label className="block font-medium text-gray-700 dark:text-gray-300 mb-1">名前</label>
