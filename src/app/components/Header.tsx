@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import ThemeToggle from "./ThemeToggle";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -9,11 +10,34 @@ export default function Header() {
   const pathname = usePathname();
   const router = useRouter();
   const [isGuest, setIsGuest] = useState(false);
+  const [isDarkMode, setIsDarkMode] = useState(false);
 
   useEffect(() => {
     // クライアントサイドでのみ実行
     const guestMode = sessionStorage.getItem('guestMode') === 'true';
     setIsGuest(guestMode);
+
+    // ダークモードの検出
+    const checkDarkMode = () => {
+      const isDark = document.documentElement.classList.contains('dark');
+      setIsDarkMode(isDark);
+    };
+
+    // 初期チェック
+    checkDarkMode();
+
+    // MutationObserverでdarkクラスの変更を監視
+    const observer = new MutationObserver((mutations) => {
+      mutations.forEach((mutation) => {
+        if (mutation.attributeName === 'class') {
+          checkDarkMode();
+        }
+      });
+    });
+
+    observer.observe(document.documentElement, { attributes: true });
+
+    return () => observer.disconnect();
   }, []);
 
   const handleMyPageClick = (e: React.MouseEvent) => {
@@ -23,12 +47,25 @@ export default function Header() {
     }
   };
 
+  const logoStyle = isDarkMode ? { filter: 'invert(1)' } : {};
+
   return (
     <header className="flex justify-between p-4 bg-gray-100 dark:bg-gray-900 dark:text-white transition-colors relative">
       <nav className="flex justify-between items-center w-4/5 md:w-11/12 mx-auto">
         {pathname === "/" && 
           <>
-            <h1>TOP</h1>
+            <Link href="/" className="text-black dark:text-white">
+              <div className="h-8 w-auto">
+                <Image 
+                  src="/images/logo.svg" 
+                  alt="Jicoca" 
+                  width={97} 
+                  height={19} 
+                  className="h-full w-auto"
+                  style={logoStyle}
+                />
+              </div>
+            </Link>
             <Link 
               href="/mypage/" 
               onClick={handleMyPageClick}
@@ -45,7 +82,18 @@ export default function Header() {
         }
         {pathname === "/mypage" && 
           <>
-            <h1>マイページ</h1>
+            <Link href="/" className="text-black dark:text-white">
+              <div className="h-8 w-auto">
+                <Image 
+                  src="/images/logo.svg" 
+                  alt="Jicoca" 
+                  width={97} 
+                  height={19} 
+                  className="h-full w-auto"
+                  style={logoStyle}
+                />
+              </div>
+            </Link>
             <Link href="/" className="bg-blue-500 text-white p-2 rounded hover:opacity-70">← 戻る</Link>
           </>
         }

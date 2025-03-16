@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 import { supabaseClientInstance } from "../lib/supabaseClient";
 import Layout from "../components/Layout";
 
@@ -48,11 +49,25 @@ export default function LoginPage() {
     router.push("/"); // TOPページへ遷移
   };
 
+  // ログインページのロゴは常に白色で表示（グラデーション背景上）
+
   return (
     <Layout>
       <div className="container mx-auto px-4 py-8 flex min-h-[calc(100vh-80px)] items-center justify-center">
         <div className="w-full max-w-md bg-white dark:bg-gray-800 rounded-lg overflow-hidden shadow-lg border border-gray-200 dark:border-gray-700">
           <div className="p-4 bg-gradient-to-r from-blue-500 to-purple-600 dark:from-blue-600 dark:to-purple-700">
+            <div className="flex justify-center mb-2">
+              <div className="h-8 w-auto text-white">
+                <Image 
+                  src="/images/logo.svg" 
+                  alt="Jicoca" 
+                  width={97} 
+                  height={19} 
+                  className="h-full w-auto"
+                  style={{ filter: 'brightness(0) invert(1)' }}
+                />
+              </div>
+            </div>
             <h2 className="text-2xl font-bold text-center text-white">{isLogin ? "ログイン" : "新規登録"}</h2>
           </div>
           
