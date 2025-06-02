@@ -65,7 +65,7 @@ export default function Header() {
 
   return (
     <header className="flex justify-between p-4 bg-gray-100 dark:bg-gray-900 dark:text-white transition-colors relative">
-      <nav className="flex justify-between items-center w-4/5 md:w-11/12 mx-auto">
+      <nav className="flex md:justify-between gap-x-6 md:gap-x-0 items-center w-full md:w-11/12 mx-auto">
         {pathname === "/" && 
           <>
             <Link href="/" className="text-black dark:text-white">
